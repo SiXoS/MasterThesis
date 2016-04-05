@@ -1,0 +1,41 @@
+\chapter{Appendix B}
+\section{Merging intervals}
+
+In this appendix we specify an algorithm to merge two lists of intervals sorted in ascending order by the start position of the intervals. The algorithm runs in $O(n)$ time units as in each loop we consume an interval from either list one or list two. If the size of list one is $k$ and the size of list two is $m$ then there will be a total of $k+m$ iterations in the while loop. The time complexity of $tryToJoinIntervals()$ is $O(1)$.
+
+\begin{lstlisting}
+interval1 = intervalList1.pop();
+interval2 = intervalList2.pop();
+first = true;
+while(interval1 != null || interval2 != null){
+    foundInIndex = false;
+    if(interval1 != null && 
+       (interval2 == null || interval1.start < interval2.start)){
+        currentInterval = interval1;
+        interval1 = intervalList1.pop();
+    }else{
+        currentInterval = interval2;
+        interval2 = intervalList2.pop();
+    }
+    
+    if(first){
+        first = false;
+        resultingIntervals = {currentInterval};
+    }else if(!tryToJoinIntervals(resultingIntervals.peek(),currentInterval))
+        resultingIntervals.add(currentInterval);
+        
+    }
+        
+}
+return resultingIntervals;
+
+function tryToJoinIntervals(interval1,interval2){
+    if(interval1.start <= interval2.end && 
+       interval1.end >= interval2.start){
+         interval1.start = min(interval1.start,interval2.start);
+         interval1.end = max(interval1.end,interval2.end);
+         return true;
+    }
+    return false;
+}
+\end{lstlisting}
