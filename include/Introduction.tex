@@ -17,7 +17,7 @@ At each time step $i > 1$ we have  $G_i = (G_{i-1} \backslash D_{i-1}) \cup A_{i
 
 The algorithm will be used by Meltwater to define an influence metric on journalists. A graph will initially be built from the data collected by Meltwater. The data comes from sources such as news papers and social networks. Whenever more information is collected the graph should be updated to continuously contain relevant information. The number of new documents each day is in the scale of tens of millions and the existing documents are in the scale of billions. To be able to handle these magnitudes, the time and space complexity of our proposed algorithm are very limited.
 
-The data stream from Meltwater have some specific properties that can be accounted for in the algorithm. It is rarely the case that they remove items and connections from the data, hence insertions will be much more common than deletions. 
+The data stream from Meltwater have some specific properties that can be accounted for in the algorithm. It is rarely the case that they remove items and connections from the data, hence insertions will be much more common than deletions. The original graph is very large, and the data-stream is relatively small compared to its size. 
 
 \section{Limitations}
 \subsection{Entity disambiguating}

@@ -27,7 +27,7 @@ The performance difference between unioning graphs and directly merging a graph 
 \end{figure}
 
 \subsection{Merging two graph files}
-A method to merge the raw format of two BVGraphs without the references has been developed. The merging speed improves \todo{Show and analyze Benchmark here} tenfold by ignoring the references and the space used by the graphs are approximately doubled. This merge method is more appropriate than the existing one as for the algorithm to be dynamic\todo{komma här?} modifications to the graph have to be done as quickly as possible. This method has two phases for each node. The first phase reads the intervals of both graphs and merge them. As the intervals in the graph files are sorted in ascending order by the start of the interval, this can be done in $O(n)$ time (see Appendix B). In the next step, the algorithm takes the smallest residual node from one of the graphs and writes it to the output graph. As the residuals are already sorted in ascending order in the graphs, only the current head residuals in the graphs need to be considered. If they are the same, it is written once and both file pointers are moved forward so that no duplicates are written. If the residual to be written is already included in one of the intervals, it is ignored. Using this developed method allows for merging very large graphs at a short amount of time.
+A method to merge the raw format of two BVGraphs without the references has been developed. The merging speed improves \todo{Show and analyze Benchmark here} tenfold by ignoring the references and the space used by the graphs are approximately doubled. This merge method is more appropriate than the existing one as for the algorithm to be dynamic, modifications to the graph have to be done as quickly as possible. This method has two phases for each node. The first phase reads the intervals of both graphs and merge them. As the intervals in the graph files are sorted in ascending order by the start of the interval, this can be done in $O(n)$ time (see Appendix B). In the next step, the algorithm takes the smallest residual node from one of the graphs and writes it to the output graph. As the residuals are already sorted in ascending order in the graphs, only the current head residuals in the graphs need to be considered. If they are the same, it is written once and both file pointers are moved forward so that no duplicates are written. If the residual to be written is already included in one of the intervals, it is ignored. Using this developed method allows for merging very large graphs at a short amount of time.
 
 \subsection{How we solved it}
 Not yet completed
@@ -35,7 +35,7 @@ Not yet completed
 \section{HyperLogLog resize}
 After new nodes have been added to the graph, new counters have to be created for them. The initial counters retreived by HyperBall are represented as an array of longs. We intend to keep this representation, as it has a very low amount of wasted memory usage. It also minimized the number of objects created on the heap. But as new counters are needed, the array must be resized. For this, a geometric expansion is used as it gives $O(1)$ amortized time per insertion \cite{dynamicarrays}. In the geometric expansion the array capacity is increased by a factor. This is how the standard implementation of ArrayList in Java is dynamically increased. A larger factor implies an on average small number of copies per inserted elements but a high amount of unused space. The amortized number of copies per inserted element for a factor $r$ is roughly $\frac{1}{(r-1)}$ and the average unused space is $\log(r)*\frac{r}{(r-1)} - 1$. \cite{dynamicarrays}
 
-Under the assumption that the graph expands slowly relative to its size \todo{Where is this assumption? write in problem description what assumptions we have, eg expands, delete/insert ration}, resizing events will be sparse and a large factor would mainly imply a large amount of unused memory. Therefore, it is more beneficial to let the array increase by a small factor. With the factor $r = 1.1$, an average of $4.8$\% space is unused and every element will on average be copied $10$ times.
+Under the assumption that the graph expands slowly relative to its size, resizing events will be sparse and a large factor would mainly imply a large amount of unused memory. Therefore, it is more beneficial to let the array increase by a small factor. With the factor $r = 1.1$, an average of $4.8$\% space is unused and every element will on average be copied $10$ times.
 
 \section{Updating counters}
 
@@ -70,10 +70,8 @@ Node history speeds up the algorithm but also uses extra space that, for large g
 \subsection{Vertex cover}
 One way to determine which nodes that should keep their history is to use the nodes that are in a minimum vertex cover $VC$. Only saving the node history on nodes that are part of the $VC$ can significantly improve space usage, yet the BFS can still be bounded. The trick here is that for all nodes $u$, it holds that $u \in VC \vee \forall e = (u,v) : v \in VC$. Then, when the collecting-BFS searches from a node $v$ it will take at most two steps until it reach a frontier of only nodes in the vertex cover. From this frontier, the collecting-BFS can calculate $v$'s history and counter by merging the frontiers collection histories. The collection-BFS is now bounded by two steps, resulting in $O(\Delta_v + \sum_{u \in \delta^+_v}{\Delta_u}) $ operations. The top counter uses the same space but the history counters now use $O((h-1)|VC| \log \log n)$, so the total space complexity for the counter collection is $O(((h-1)|VC| + 1 )\log \log n)$.
 
-
 \subsubsection{Dynamic minimum vertex cover}
 There is a requirement to, at all times, keep track of which nodes are in the vertex cover. This requires a fully dynamic minimum vertex cover algorithm. However, as minimum vertex cover is NP-complete, approximation algorithms must be used. The choice of fully dynamic approximate minimum vertex cover algorithm depends on the ratio between the number of insertions and deletions. A simple greedy algorithm can maintain a $2$-approximation in $O(1)$ time per insertion and $O(n)$ time per deletion \cite{2appdynvc}, while an algorithm that partition the nodes can maintain the same approximation in $O(\log(n))$ amortized time per insertion and deletion \cite{2appdynvclogn}. In our case, deletions will be very sparse in the data stream, which is why the greedy algorithm was chosen. The greedy algorithm also have the property that if a deleted edge was not part of the maximal matching previously, it deletes the edge in $O(1)$ operations. For dense graphs, only a small amount of the edges will be in the maximal matching, which makes it in many cases perform very quickly in deletions as well. 
-
  
 \subsubsection{Directed graphs}
 As the standard minimum vertex cover problem is defined for undirected graphs the problem have to be slightly modified. The new problem description is as follows; given a directed graph $G = (V,E)$, we wish to select a minimum cardinality subset $V' \subseteq V$ such that $\forall e = (u,v) \in E, u \in V' \vee v \in V'$. The problem is still NP-complete as undirected graphs are a special case of directed graphs. 
@@ -87,7 +85,7 @@ The selected greedy algorithm was benchmarked with the publicly available it-200
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=14cm]{firstIterationDvc}    
+\includegraphics[width=12cm]{firstIterationDvc}    
 \captionsetup{justification=centering}
 \caption {Benchmark of sequential insertions in 2-approximative dynamic vertex cover}
 \label{fig:firstIterationDvc}
@@ -100,73 +98,19 @@ To test the performance of sequentially deleting edges the publicly available in
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=14cm]{firstIterationDvcDeletions}    
+\includegraphics[width=12cm]{firstIterationDvcDeletions}    
 \captionsetup{justification=centering}
 \caption {Benchmark of sequential deletions in 2-approximative dynamic vertex cover}
 \label{fig:firstIterationDvcDeletion}
 \end{figure}
 
+\subsection{Edge insertion}
 
-\section{Algorithm}
-
-\todo{This section mention lots of already mentioned things, perhaps merge these parts into above sections}
-
-As the algorithm should be able to be initiated on an existing graph we use HyperANF to calculate the initial counter collection. HyperANF is already implemented in an iteration based manner. For each iteration run, the neighborhood function for all nodes reach one step further. The counters for the nodes in the vertex cover are extracted for each iteration, except the last iteration where we keep all nodes' counters. 
-
-\subsection{Edge Insertions}
-
-Edge insertion is divided into four steps. The first step is checking if the edge contains nodes not present in the current graph. New nodes are added to the graph and the top counter is, if necessary, resized to fit new counters of the new nodes. The second step is to check if any new node needs to be added into the vertex cover. For all new nodes in the vertex cover, memory is allocated in the history counters. The third step is calculating the history of the nodes added to the vertex cover. Lastly, the new history is propagated with a BFS in the transpose graph to update the counters of nodes that reach new nodes. After these four steps all nodes will have their top counters updated and all nodes in the vertex cover will have their history counters in order. 
-
-\subsubsection{Calculating node history}
-
-Calculating the node history of an added node $v$ is done based on the history from the vertex cover nodes around $v$. We know that there will be a vertex cover node on all paths at most 2 steps away. We perform a BFS from $v$. If it encounters a node $u$ not in the vertex cover, $u$ is simply added to the counter of $v$. This can only happen at one step away from $v$, so $u$ is added to all counters in $v$'s history except the top one. If a node $u$ that is in the vertex cover is encountered we can take the history-counters of $u$. Let the distance from $u$ to $v$ be $x$. We take the counters on level $0$ to $h-x$ from $u$ and union them with the top history counters of $v$. \todo{This sentence can probably be better structured}  The algorithm is presented in pseudo-code in figure \ref{fig:edge_insertion_algorithm}.
-
-\begin{figure}[h]
-    \begin{lstlisting}[mathescape]
-Let v = The node to calculate the history for;
-Let H(v,i) = the neighborhood function for v reaching i steps;
-In BFS; current node: u, at depth: d > 0{
-    if(isInVertexCover(u)){
-        for all i: d $\leq$ i $\leq$ h {
-            H(v,i).union(H(u,i-d));
-        }
-        //prune this BFS branch
-    }else{
-        H(v,h-1).add(u);
-    }
-}
-    \end{lstlisting}
-    \caption{Edge insertion algorithm}
-    \label{fig:edge_insertion_algorithm}
-\end{figure}
-
-The algorithm only works for one node at a time. However, by leveraging the mentioned MS-BFS algorithm \cite{msbfs}, we can perform the calculation for several nodes at the same time. When using MS-BFS we get a list of the source nodes that reach the node with the given depth. The new algorithm is seen in figure \ref{fig:multiple_edge_insertion_algorithm}.
-
-\begin{figure}[h]
-    \begin{lstlisting}[mathescape]
-Let H(v,i) = the neighborhood function for v reaching i steps;
-In BFS; sources: V, current node: u, at depth: d > 0{
-    foreach v $\in$ V{
-        if(isInVertexCover(u)){
-            for all i: d $\leq$ i $\leq$ h {
-                H(v,i).union(H(u,i-d));
-            }
-            //prune this BFS branch
-        }else{
-            H(v,h-1).add(u);
-        }
-    }
-}
-    \end{lstlisting}
-    \caption{Multiple edge insertion algorithm}
-    \label{fig:multiple_edge_insertion_algorithm}
-\end{figure}
-
-Unfortunately this algorithm is not thread-safe. For example if two threads are running the union method for the same node at the same time it is very likely that one of the calculations are lost. Large portions of the BFS will still be done in parallel. There are several ways to synchronize the calculation which may allow large parts of the visitor to be done in parallel. Experiments with different synchronizations will be made in the Benchmarking section. Another bad property is that the BFS can arrive at one of the new nodes which may not have finished its history calculation. However, the fourth step in the algorithm, the propagation step, will solve this issue. 
+Edge insertion now is divided into four steps. The first step is checking if the edge contains any new nodes. New nodes are added to the graph and the top counter is, if necessary, resized to fit new counters of the new nodes. The second step is to check if any new node needs to be added into the vertex cover. For all new nodes in the vertex cover, memory is allocated in the history counters. The third step is calculating the history of the nodes added to the vertex cover. Lastly, the new history is propagated with a BFS in the transpose of the graph to update the counters of nodes affected by the insertion. After these four steps all nodes will have an approximate neighborhood function in their top counters and all nodes in the vertex cover will have their history counters updated. 
 
 \subsubsection{History propagation}
 
-When a new edge $e = (u,v)$ is added to the graph, many nodes that has a path to $u$ will contain outdated information. The algorithm works by propagating the history of $v$ through the transpose of the graph. If $v$ is not in the Vertex Cover we need to calculate its history from the neighbor nodes. We present the algorithm as pseudo code in figure \ref{fig:history_propagation_algorithm}.
+When a new edge $e = (u,v)$ is added to the graph, many nodes that has a path to $u$ will contain outdated information. The algorithm works by propagating the history of $v$ through the transpose of the graph. If $v$ is not in the Vertex Cover, the history needs to be calculated from the neighbor nodes. The algorithm is presented in pseudo code, see figure \ref{fig:history_propagation_algorithm}.
 
 \begin{figure}[h]
     \begin{lstlisting}[mathescape]
@@ -191,7 +135,7 @@ In BFS; source: u, current node: z, at depth: d{
     \label{fig:history_propagation_algorithm}
 \end{figure}
 
-We want to modify this algorithm to work with several edges at once. In this case we can use the traveler support of the MS-BFS algorithm. This means that we don't have to loop through all source nodes but can use the data provided by the traveler. The travelers will contain the counter registers of their respective source node. When they merge we can simply take the union of their registers and only keep the $h+1-depth$ top-most counters as the others won't reach further anyway. In the visitor the data from the traveler is joined with the existing counters of the visited nodes. The merge function for the traveler is constructed as in figure \ref{fig:history_propagation_traveler}.
+To speed up the algorithm, it needs to be modifier to handle several edges at once. In this case the traveler support of the MS-BFS algorithm can be used. This means that the data provided by the traveler can be used instead of looping through all the source nodes. The travelers will contain the counter registers of their respective source node. When the travelers merge they can take the union of their registers. They also only need to keep the $h+1-depth$ top-most counters as the others won't reach further anyway. In the visitor the data from the traveler is joined with the existing counters of the visited nodes. The merge function for the traveler is constructed as in figure \ref{fig:history_propagation_traveler}.
 
 \begin{figure}[h]
     \begin{lstlisting}[mathescape]
@@ -208,8 +152,7 @@ return tOut
     \label{fig:history_propagation_traveler}
 \end{figure}
 
-With this traveler we don't have to do much modification to the visitor. As the only difference is that we use the counter history from the traveler data instead of taking it from only the source node.\\
-
+The visitors only have to be slightly modified to make us of this traveler. The only difference is that the visitor use the counter history from the traveler data instead of taking it from the source nodes.\\\\
 \textit{Theorem: } After an update all nodes have had all reachable nodes added to their counters \\\\
 \textit{Proof: } This will be shown by an inductive proof. 
 
