@@ -1,6 +1,6 @@
 % CREATED BY DAVID FRISK, 2015
-Scalable graph search and entity relations in real-time data streams\\
-A Subtitle that can be Very Much Longer if Necessary\\
+\maintitle\\
+\subtitle\\
 SIMON LINDHÉN\\
 JOHAN NILSSON HANSEN\\
 Department of Computer Science and engineering\\
@@ -8,12 +8,19 @@ Chalmers University of Technology \setlength{\parskip}{0.5cm}
 
 \thispagestyle{plain}			% Supress header 
 \setlength{\parskip}{0pt plus 1.0pt}
+\setlength{\parindent}{15pt}
 \section*{Abstract}
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+The neighborhood function measures node centrality in graphs by measuring how many nodes a node can reach in a certain number of steps. The neighborhood function can be used to find, for example, important nodes or the degree of separation. 
+
+The state-of-the-art algorithm, called HyperANF, can calculate the approximate neighborhood function in graphs in the scale of billions of nodes within hours using a standard workstation\cite{hyperanf}. However, it only supports static graphs. If the neighborhood function should be calculated on a dynamic graph, the algorithm would have to be re-run at any changes in the graph. 
+
+This paper develops the algorithm DANF which extends HyperANF to support dynamic graphs. When new edges are added, only relevant nodes are updated with the new information. This allows a constantly updated neighborhood function for all nodes. DANF is used on a real-time data stream supplied by the company Meltwater. About 2 million news articles are received per day. From the articles, edges are generated and DANF is updated. 
+
+By tracking the nodes whose centrality change by an insertion, rapidly changing nodes and trends can be detected. This is used to see which subjects are getting more or less popular. 
 
 % KEYWORDS (MAXIMUM 10 WORDS)
 \vfill
-Keywords: lorem, ipsum, dolor, sit, amet, consectetur, adipisicing, elit, sed, do.
+\noindent Keywords: HyperANF, HyperBall, DANF, node centrality, approximate neighborhood function, neighborhood function
 
 \newpage				% Create empty back of side
 \thispagestyle{empty}

@@ -16,7 +16,7 @@ The webgraph framework has a way to create a new graph $G$ by taking the union o
 
 The framework also supports writing a union-graph to disk as a new graph. Loading this new written graph removes the overhead of several recursive unions. As the graph express some arcs by references to previous arcs, the creation is slow and doesn't leverage any of the calculations already made by the existing graphs. Ignoring the references will make the graphs bigger but it increases the running time of the merge.
 
-The performance difference between unioning graphs and directly merging a graph can be seen in figure \ref{fig:firstIterationUnionVsStored}. Two graphs are used, both originally containing the in-2004 graph. For 50 iterations 1.000 edges are randomly generated and inserted into both graph. One of the graphs only use unions while the other merge the new edges directly into the graph and stores it. The time measured is the time to add the edges and then performing a complete edge scan. This time is saved after each iteration. During the first six iterations, the unioned graph performs faster than the merged. The union scales linearly with the number of unions while the merged graph has constant performance.  
+The performance difference between unioning graphs and directly merging a graph can be seen in figure \ref{fig:firstIterationUnionVsStored}. Two graphs are used, both originally containing the in-2004 graph, see Appendix \ref{appendix4}. For 50 iterations 1,000 edges are randomly generated and inserted into both graph. One of the graphs only use unions while the other merge the new edges directly into the graph and stores it. The time measured is the time to add the edges and then performing a complete edge scan. This time is saved after each iteration. During the first six iterations, the unioned graph performs faster than the merged. The union scales linearly with the number of unions while the merged graph has constant performance.  
 
 \begin{figure}[h]
 \centering
@@ -46,6 +46,14 @@ The collecting-bfs is responsible for retrieving which nodes $v$ can reach. The 
 The propagation-bfs is responsible for updating the counters of all nodes that now reach $v$, as they might have changed by the insertion. To find all nodes that can reach $v$, a bfs is performed from $u$ in the transpose of the graph. For every level $i$ in the bfs, the frontier of nodes in the bfs can reach all nodes that the collecting-bfs reached in $h-1-i$ steps. To update the counters of the nodes at level $i$, the current counters of the nodes are merged with the $h-1-i$ counter retrieved in the collecting-bfs. The propagation-bfs stops after $h-1$ steps after which all affected node counters have been updated.
 
 \todo{Insert proof of correctness here}
+\textit{Lemma: } 
+\textit{Proof: }
+
+Induction proof
+
+\textit{Theorem: } The two-BFS algorithm yields node counters identical to a HyperANF recalculation. \todo{This sentence is bad!}
+
+\textit{Proof: } Let $S(v)$ be the set of hashed nodes that produced the counter $C(v)$. After an edge insertion, assume $\exists v : C_{2bfs}(v) \ne C_{hanf}(v)$. This means that $S_{2bfs}(v) \ne S_{hanf}(v)$. We know that $S_{hanf}(v) = \{ u : dist(u,v) \leq h \}$. By the two-BFS algorithm 
 
 \subsection{Optimized Breadth-first search}
 
@@ -63,50 +71,73 @@ During the HyperBall phase of the algorithm, the intermediate counters in HyperB
 
 Every node now has a list of its history which has to be updated with every edge update. For an edge $e = (u,v)$ inserted, the collecting-BFS has to gather the node history from all neighbors of $v$ and merge them into one. The merged history together with the $v$ itself added to them becomes $v$'s own history and counter. Then the propagation-BFS has to propagate this history in the transpose of the graph. These merging operations can be performed during the current BFS's and does not affect the time complexity of the bfs's.
 
-With node history the algorithm has $O(hn \log \log n)$ space complexity as the top counter uses $O(n \log \log n)$ and the history counters use $O((h-1)n \log \log n)$. To insert an edge $e = (u,v)$, the two previous BFS's used $O(m)$ operations per BFS but with node history the collection-BFS use $O(\Delta_v)$ operations, where $\Delta_v$ is the out degree of node $v$. The time complexity of the node history version is then $O(m + \Delta_v)$. In practice, this means a large improvement as it often holds that $\Delta_v << m$.
+With node history the algorithm has $O(hn \log \log n)$ space complexity, as the top counter uses $O(n \log \log n)$ and the history counters use $O((h-1)n \log \log n)$. To insert an edge $e = (u,v)$, the two previous BFS's used $O(m)$ operations per BFS but with node history the collecting-BFS use $O(d^+(v))$ operations, where $d^+(v)$ is the out degree of node $v$. The time complexity of the node history version is then $O(m + d^+(v))$. In practice, this means a large improvement as it often holds that $d^+(v) << m$.
 
 Node history speeds up the algorithm but also uses extra space that, for large graphs, can be quite extensive. To create an algorithm that balances the gained speed versus the extra memory usage, the history could be saved for only a subset of nodes. These nodes should be picked so that as few nodes as possible need to save their history while keeping the BFS distance as short as possible. The algorithm to determine these nodes have to be very fast to avoid affecting the running time of the algorithm. It would also have to be dynamic to be able to continuously determine which nodes that should be included in the set.
 
 \subsection{Vertex cover}
-One way to determine which nodes that should keep their history is to use the nodes that are in a minimum vertex cover $VC$. Only saving the node history on nodes that are part of the $VC$ can significantly improve space usage, yet the BFS can still be bounded. The trick here is that for all nodes $u$, it holds that $u \in VC \vee \forall e = (u,v) : v \in VC$. Then, when the collecting-BFS searches from a node $v$ it will take at most two steps until it reach a frontier of only nodes in the vertex cover. From this frontier, the collecting-BFS can calculate $v$'s history and counter by merging the frontiers collection histories. The collection-BFS is now bounded by two steps, resulting in $O(\Delta_v + \sum_{u \in \delta^+_v}{\Delta_u}) $ operations. The top counter uses the same space but the history counters now use $O((h-1)|VC| \log \log n)$, so the total space complexity for the counter collection is $O(((h-1)|VC| + 1 )\log \log n)$.
+One way to determine which nodes that should keep their history is to use the nodes that are in a minimum vertex cover $VC$. Only saving the node history of nodes that are part of the $VC$ can significantly improve space usage, yet the BFS can still be bounded. 
+
+The top counter still needs to contain counters for all nodes so the space complexity of the top counter is still $O(n\log \log n)$. As the history counters only include counters of nodes in the $VC$, the history counters space complexity is reduced from $O((h-1)n \log \log n)$ to $O((h-1)|VC| \log \log n)$. In total, the node history use $O(((h-1)|VC| + n )\log \log n)$ space.
+
+The trick here is that for all nodes $u$, it holds that $u \in VC \vee \forall e = (u,v) : v \in VC$. Then, when the collecting-BFS searches from a node $v$ it will take at most one step until it reach a frontier of only nodes in the vertex cover. From this frontier, the collecting-BFS can calculate $v$'s history and counter by merging the frontiers collecting histories. The collecting-BFS is now bounded by one step.\\
+\todo{FIX THIS}
 
 \subsubsection{Dynamic minimum vertex cover}
-There is a requirement to, at all times, keep track of which nodes are in the vertex cover. This requires a fully dynamic minimum vertex cover algorithm. However, as minimum vertex cover is NP-complete, approximation algorithms must be used. The choice of fully dynamic approximate minimum vertex cover algorithm depends on the ratio between the number of insertions and deletions. A simple greedy algorithm can maintain a $2$-approximation in $O(1)$ time per insertion and $O(n)$ time per deletion \cite{2appdynvc}, while an algorithm that partition the nodes can maintain the same approximation in $O(\log(n))$ amortized time per insertion and deletion \cite{2appdynvclogn}. In our case, deletions will be very sparse in the data stream, which is why the greedy algorithm was chosen. The greedy algorithm also have the property that if a deleted edge was not part of the maximal matching previously, it deletes the edge in $O(1)$ operations. For dense graphs, only a small amount of the edges will be in the maximal matching, which makes it in many cases perform very quickly in deletions as well. 
+There is a requirement to, at all times, keep track of which nodes are in the vertex cover. This requires a fully dynamic minimum vertex cover algorithm. However, as minimum vertex cover is NP-complete, approximation algorithms must be used. The choice of fully dynamic approximate minimum vertex cover algorithm depends on the ratio between the number of insertions and deletions. A simple greedy algorithm can maintain a $2$-approximation in $O(1)$ time per insertion and $O(n)$ time per deletion \cite{2appdynvc}, while an algorithm that partition the nodes can maintain the same approximation in $O(\log n )$ amortized time per insertion and deletion \cite{2appdynvclogn}. In our case, deletions will be very sparse in the data stream, which is why the greedy algorithm was chosen. The greedy algorithm also have the property that if a deleted edge was not part of the maximal matching previously, it deletes the edge in $O(1)$ operations. For dense graphs, only a small amount of the edges will be in the maximal matching, which makes it in many cases perform very quickly in deletions as well. 
+
  
 \subsubsection{Directed graphs}
 As the standard minimum vertex cover problem is defined for undirected graphs the problem have to be slightly modified. The new problem description is as follows; given a directed graph $G = (V,E)$, we wish to select a minimum cardinality subset $V' \subseteq V$ such that $\forall e = (u,v) \in E, u \in V' \vee v \in V'$. The problem is still NP-complete as undirected graphs are a special case of directed graphs. 
 
-By the same reasoning as in the undirected case, a maximal matching is a $2$-approximation of the generalized problem. However, the greedy algorithm needs to be modified to support directed edges. The only case affected is when an edge in the maximal matching is deleted. Previously, the algorithm scanned the endpoints of the deleted edge for uncovered edges. With directed edges, both incoming and outgoing edges must be verified. This can be solved by saving both directions into each node, as in the undirected case. However, this would imply a doubling in space usage for the graph. Also, as deletions are expected to be rare, saving both types would in most cases be unnecessary. Instead, the problem can be solved by a complete edge scan. An edge scan can detect all edges, incoming and outgoing, that are possibly affected. This requires no extra information added, but implies a larger time complexity for deletions. Instead of $O(n)$ operations, deleting edges now take $O(m)$ operation per deletion. Fortunately, the amortized number of edge scans required per deletion can be reduced by performing deletions in bulk. A single edge scan is sufficient for detecting all the affected edges of any sized bulk of deletions. 
+By the same reasoning as in the undirected case, a maximal matching is a $2$-approximation of the generalized problem. The greedy algorithm needs to be modified to support directed edges. The only case affected is when an edge in the maximal matching is deleted. Let $e = (u,v)$ be a deleted edge. Previously, the algorithm removed both $u,v$ from the vertex cover and then scanned the outgoing edges from $u,v$ for edges uncovered due to the removal. With directed edges, both incoming and outgoing edges must be verified. This is solved by scanning the outgoing edges of $u,v$ in both the original graph and the transpose of it. The original graph will give the outgoing edges of $u,v$ and the transpose the incoming.
 
 \subsubsection{Benchmark insertions}
-The selected greedy algorithm was benchmarked with the publicly available it-2004 graph. It-2004 contains 41.291.594 nodes and 1.150.725.436 edges. Starting with an empty graph, every edge was sequentially inserted from it-2004 into the dynamic vertex cover. Both the time and heap size was measured over the number of inserted edges, see figure \ref{fig:firstIterationDvc}. This shows roughly 29.5 million inserted edges per second. The memory used mainly depends on the number of nodes. The heap size increased from 0.93GB to 1.51GB, hence 0.58GB memory was used to remember the vertex cover. 0.58GB equals 622770258 bytes, making it an on average 15 bytes per node. 
+The selected greedy algorithm was benchmarked with the it-2004 graph, see Appendix \ref{appendix4}. Starting with an empty graph, every edge was sequentially inserted from it-2004 into the dynamic vertex cover. Both the time and heap size was measured over the number of inserted edges, see figure \ref{fig:firstIterationDvc}. This shows roughly 29.5 million inserted edges per second. The memory used mainly depends on the number of nodes. The heap size increased from 0.93GB to 1.51GB, hence 0.58GB memory was used to remember the vertex cover. 0.58GB equals 622,770,258 bytes, making it an on average 15 bytes per node. 
 
-% 15 bytes per node is nice. Should be 8 + 8 bytes + 1 bit p = 16.125 bytes so seems perfect!
+% 15 bytes per node is nice. Should be 8 + 8 bytes + 1 bit p = 16,125 bytes so seems perfect!
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=12cm]{firstIterationDvc}    
 \captionsetup{justification=centering}
-\caption {Benchmark of sequential insertions in 2-approximative dynamic vertex cover}
+\caption {Benchmark of sequential insertions in 2-approximate dynamic vertex cover}
 \label{fig:firstIterationDvc}
 \end{figure}
 
 \subsubsection{Benchmark deletions}
-To test the performance of sequentially deleting edges the publicly available in-2004 graph was used. In-2004 contains 1.382.908 nodes and 16.917.053 edges. The test was performed by first inserting all edges into the dynamic vertex cover and then taking the first 2.000 edges in the graph file and sequentially delete them, see figure \ref{fig:firstIterationDvcDeletion}. The benchmark shows that for this relatively small graph the algorithm achieves roughly 25 deletions per second. As this speed will decrease linearly with the number of edges in the graph, edges must be deleted in bulk.
-
-\todo{Implement bulk deletions and compare with sequential}
+To test the performance of sequentially deleting edges the it-2004 graph was used, see Appendix \ref{appendix4}. The test was performed by first inserting all edges into the dynamic vertex cover and then sequentially delete them, see figure \ref{fig:firstIterationDvcDeletion}. All 1,150,725,436 edges were deleted in 255 seconds, giving a performance of 4,500,000 deleted edges per second. 
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=12cm]{firstIterationDvcDeletions}    
 \captionsetup{justification=centering}
-\caption {Benchmark of sequential deletions in 2-approximative dynamic vertex cover}
+\caption {Benchmark of sequential deletions in 2-approximate dynamic vertex cover}
 \label{fig:firstIterationDvcDeletion}
 \end{figure}
 
 \subsection{Edge insertion}
 
 Edge insertion now is divided into four steps. The first step is checking if the edge contains any new nodes. New nodes are added to the graph and the top counter is, if necessary, resized to fit new counters of the new nodes. The second step is to check if any new node needs to be added into the vertex cover. For all new nodes in the vertex cover, memory is allocated in the history counters. The third step is calculating the history of the nodes added to the vertex cover. Lastly, the new history is propagated with a BFS in the transpose of the graph to update the counters of nodes affected by the insertion. After these four steps all nodes will have an approximate neighborhood function in their top counters and all nodes in the vertex cover will have their history counters updated. 
+
+\subsubsection{Partial history calculation}
+
+With a dynamic vertex cover, there is also a requirement to keep the history of the nodes in the vertex cover correct. When a bulk of edges are inserted we have to modify the vertex cover and update the history. Using a maximal matching \cite{2appdynvc}, which doesn't delete any vertices upon insertion, we can create an upper bound of 1 BFS level to generate a partial history calculation. We only need to make sure that the node added to the vertex cover has the history it would have before the current bulk insertion. The rest of the nodes will be propagated by the propagating-BFS.
+
+The recalculation algorithm of node $v$ looks through all its neighbors that are in the vertex cover and adds their history to its own. 
+
+\noindent\textit{Theorem:} For the collecting-bfs to receive at least the history it would have had after the previous insertion, it needs only one step. \\
+
+\noindent\textit{Proof:} Given a node $v$ whose history should be calculated:
+
+\begin{addmargin}[2em]{0em}\\
+\noindent\textit{Fact:} It holds that $v \in VC \vee \forall e = (v,u) : u \in VC$
+
+\noindent\textit{Assumption:} The history of the nodes in the vertex cover is correct between insertions.
+
+If the history of $v$ should be calculated and was not in the vertex cover, then all previous neighbors must be in the vertex cover and contain the correct history from before the current insertion. So $v$ will receive at least the history it would have after the previous step. It cannot receive faulty nodes if edges have only been inserted. That would mean that the history of $v$'s neighbors were wrong.
+\end{addmargin} 
+
 
 \subsubsection{History propagation}
 
@@ -135,7 +166,7 @@ In BFS; source: u, current node: z, at depth: d{
     \label{fig:history_propagation_algorithm}
 \end{figure}
 
-To speed up the algorithm, it needs to be modifier to handle several edges at once. In this case the traveler support of the MS-BFS algorithm can be used. This means that the data provided by the traveler can be used instead of looping through all the source nodes. The travelers will contain the counter registers of their respective source node. When the travelers merge they can take the union of their registers. They also only need to keep the $h+1-depth$ top-most counters as the others won't reach further anyway. In the visitor the data from the traveler is joined with the existing counters of the visited nodes. The merge function for the traveler is constructed as in figure \ref{fig:history_propagation_traveler}.
+To speed up the algorithm, it needs to be modified to handle several edges at once. In this case the traveler support of the MS-BFS algorithm can be used. This means that the data provided by the traveler can be used instead of looping through all the source nodes. The travelers will contain the counter registers of their respective source node. When the travelers merge they can take the union of their registers. They also only need to keep the $h+1-depth$ top-most counters as the others won't reach further anyway. In the visitor the data from the traveler is joined with the existing counters of the visited nodes. The merge function for the traveler is constructed as in figure \ref{fig:history_propagation_traveler}.
 
 \begin{figure}[h]
     \begin{lstlisting}[mathescape]
@@ -153,6 +184,9 @@ return tOut
 \end{figure}
 
 The visitors only have to be slightly modified to make us of this traveler. The only difference is that the visitor use the counter history from the traveler data instead of taking it from the source nodes.\\\\
+
+Given that the partial history calculation makes sure that all nodes in the vertex cover has the history it would have before the current insertion, we can prove that all nodes will have the correct history after the propagation step. 
+
 \textit{Theorem: } After an update all nodes have had all reachable nodes added to their counters \\\\
 \textit{Proof: } This will be shown by an inductive proof. 
 
@@ -163,7 +197,7 @@ The visitors only have to be slightly modified to make us of this traveler. The 
 
 \textbf{$u$ reached $v$ in update $p$}) By the induction hypothesis it holds that the counters where correct in update $p$, hence $v$ have been added to the counter of $u$.\\
 
-\textbf{$u$ did not reach $v$ in update $p$}) As $u$ reach $v$ in update $p+1$, there must be a path $P$ from $u$ to $v$ where an edge has been added. Let $e = (a,b) \in P$ be the new edge of maximum hops from $u$. As $u$ reach $v$ in at most $h$ steps it holds that $|P| \leq h$.
+\textbf{$u$ did not reach $v$ in update $p$}) As $u$ reach $v$ in update $p+1$, there must be a path $P$ from $u$ to $v$ where an edge has been added. Let \todo{Wrongly assumes that b already existed}$e = (a,b) \in P$ be the new edge of maximum hops from $u$. As $u$ reach $v$ in at most $h$ steps it holds that $|P| \leq h$.
  As there are no more new edges between $b$ and $v$, combined with the induction hypothesis the counter of $b$ was correct in the update $p$ and included $v$. By the algorithm, the propagation step will traverse $h$ steps from $b$ and as 
 $|P_{u \rightarrow b}| \leq |P| \leq h$ the propagation from $b$ will have reached $u$ and added $v$ to its counter. $\blacksquare$
 
