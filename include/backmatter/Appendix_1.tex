@@ -1,4 +1,5 @@
 \chapter{Appendix A}
+\label{appendix1}
 \section{Number of tries until success}
 \textit{Lemma:} Given an event A with probability p to happen, the expected number of independent tries until the first success are $\frac{1}{p}$ \cite{165994}.\\\\
 \textit{Proof:} Let X be the unknown number of tries until the first success. In the first attempt, either A happened or it didn't. The chance of it happening was $p$ and the chance of it not happening was $1-p$. If it happened we had a waiting time of $1$, else we have an expected waiting time of $1 + E(X)$ more tries. We get the following equation: $$E(X) = 1*p + (1 + (E(X))(1-p)$$
