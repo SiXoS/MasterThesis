@@ -14,9 +14,9 @@ The neighborhood function measures node centrality in graphs by measuring how ma
 
 The state-of-the-art algorithm, called HyperANF, can calculate the approximate neighborhood function in graphs in the scale of billions of nodes within hours using a standard workstation\cite{hyperanf}. However, it only supports static graphs. If the neighborhood function should be calculated on a dynamic graph, the algorithm would have to be re-run at any changes in the graph. 
 
-This paper develops the algorithm DANF which extends HyperANF to support dynamic graphs. When new edges are added, only relevant nodes are updated with the new information. This allows a constantly updated neighborhood function for all nodes. DANF is used on a real-time data stream supplied by the company Meltwater. About 2 million news articles are received per day. From the articles, edges are generated and DANF is updated. 
+This paper develops the algorithm DANF which extends HyperANF to support dynamic graphs. When new edges are added, only relevant nodes are updated with the new information. This allows a constantly updated neighborhood function for all nodes. DANF is used on a real-time data stream supplied by the company Meltwater. About 2 million news articles are received per day. Edges are generated from the articles and DANF is updated. 
 
-By tracking the nodes whose centrality change by an insertion, rapidly changing nodes and trends can be detected. This is used to see which subjects are getting more or less popular. 
+Rapidly changing nodes and trends can be detected by tracking the nodes whose centrality change by an insertion. This is used to see which subjects are getting more or less popular. 
 
 % KEYWORDS (MAXIMUM 10 WORDS)
 \vfill
