@@ -63,7 +63,7 @@ While the properties mentioned above are trivially achieved in a graph of hyperl
 The transpose of a graph is a graph with all of its edges flipped. 
 
 \section{Breadth-first search}
-Breadth-first search (BFS) is an algorithm which traverses a graph from a given origin node $v$. It starts by adding the node $v$ to a queue. Then, while the queue is not empty, the algorithm takes the first node $u$ from the queue and adds the previously not seen neighbours of $u$ to the queue. In the first step $v$ will be visited. In the second step the neighbors of $v$ will be visited, and so on until all reachable nodes are traversed.
+Breadth-first search (BFS) is an algorithm which traverses a graph from a given origin node $v$. It starts by adding the node $v$ to a queue. Then, while the queue is not empty, the algorithm takes the first node $u$ from the queue and adds the previously not seen neighbors of $u$ to the queue. In the first step $v$ will be visited. In the second step the neighbors of $v$ will be visited, and so on until all reachable nodes are traversed.
 
 \subsection{Multi source}
 There exists algorithms that optimize the calculation of several BFS's simultaneously. These optimization mainly targets the ability of the different searches to use each others computations. The state-of-the-art algorithm for running a multi source breadth-first search on the CPU is called MS-BFS \cite{msbfs}.

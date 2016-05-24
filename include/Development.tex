@@ -345,8 +345,7 @@ A comparison between the trivial algorithm and DANF was performed by adding edge
 \label{fig:benchmarkDanfVsTrivial}
 \end{figure}
 
-A comparison between DANF and HyperANF was made by inserting different amounts of edges into DANF. The number of added edges that was used as the limit was when the time of inserting the edges was the same as recalculating HyperANF. The graph in figure \ref{fig:benchmarkDanfVsHanf} shows the amount of edges added compared to the initial amount of edges. When the initial graph has 72.172 edges DANF can add more than the existing edges before HyperANF finishes the recalculation on the new graph, which is the sample right above $10^0$. However, when the initial number of edges increase the ratio of the total number of edges that can be added decrease. When the number of edges grows, DANF converge towards being able to add 0.01\% of the initial edges before a recalculation is completed. The ratio of added edges to initial edges decrease as $h$ increase.
-\todo{review}
+A comparison between DANF and HyperANF was made by inserting different amounts of edges into DANF. The number of added edges that was used as the limit was when the time of inserting the edges was the same as recalculating HyperANF. The graph in figure \ref{fig:benchmarkDanfVsHanf} shows the amount of edges added compared to the initial amount of edges. When the initial graph has 70.000 edges DANF can add more than the existing edges before HyperANF finishes the recalculation on the new graph, which is the sample right above $10^0$. However, when the initial number of edges increase the ratio of the total number of edges that can be added decrease. When the number of edges grows, DANF converge towards being able to add 0.01\% of the initial edges before a recalculation is completed. The ratio of added edges to initial edges decrease as $h$ increase.
 
 \begin{figure}[h]
 \centering
