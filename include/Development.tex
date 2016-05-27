@@ -112,7 +112,7 @@ It can be desirable to send data along with the BFSs. For this, a new concept ca
 
 \subsubsection{Extended algorithm}
 
-The extended algorithm is presented in figure \ref{fig:extended_ms-bfs_algorithm}. It has only slight modifications compared to the algorithm in section 4.1.1 from \cite{msbfs}. The visitor is called on line 16. The neighbors are not inspected if the visitor returns an empty set. The travelers are merged at lines 19 to 22. If the neighbor will be visited from other nodes, i.e. the $visitNext$ bits are not empty, the existing traveler are merged with the traveler from the current node.
+The extended algorithm is presented in figure \ref{fig:extended_ms-bfs_algorithm}. It has only slight modifications compared to the algorithm in section 4.1.1 from \cite{msbfs}. The visitor is called on line 16. The neighbors are not inspected if the visitor returns an empty set. The travelers are merged at lines 19 to 22. If the neighbor will be visited from other nodes, i.e. the $visitNext$ bits are not empty, the neighbor's traveler are merged with the traveler from the current node.
 
 \begin{figure}[h]
     \begin{lstlisting}[mathescape]
@@ -327,7 +327,7 @@ The MS-BFS article \cite{msbfs} mentions that if several MS-BFSs are to be perfo
 
 
 \subsubsection{Benchmark}
-A comparison between the trivial algorithm and DANF was performed by adding edges of different bulk sizes, see figure \ref{fig:benchmarkDanfVsTrivial} and \ref{fig:benchmarkDanfVsTrivialh3}. The benchmark was performed on the graph in-2004, see Appendix \ref{appendix4}, with 16 HyperLogLog registers per node for $h = 3$ and $h = 8$. The time measured was the time to insert random edges and update the counters. The memory usage of DANF was divided into the four main components while the trivial memory usage is for the complete algorithm. The figure shows that DANF scales with the edge insertions bulk size while the trivial algorithms performance is constant. For large $h$ DANF is up to 60 times faster than the trivial algorithm, but also uses up to 45 times more memory. For small $h$ values the gained speed of DANF is smaller but so is also the space consumption. Almost all of the memory used by DANF is used by MS-BFS. The vertex cover and graph space usage is almost too small to be seen in figure \ref{fig:benchmarkDanfVsTrivial}. 
+A comparison between the trivial algorithm and DANF was performed by adding edges of different bulk sizes, see figure \ref{fig:benchmarkDanfVsTrivial} and \ref{fig:benchmarkDanfVsTrivialh3}. The benchmark was performed on the graph in-2004, see Appendix \ref{appendix4}, with 16 HyperLogLog registers per node for $h = 3$ and $h = 8$. The time measured was the time to insert random edges and update the counters. The memory usage of DANF was divided into the four main components while the trivial memory usage is for the complete algorithm. The figure shows that DANF scales with the edge insertions bulk size while the trivial algorithms performance is constant. For large $h$-values DANF is up to 60 times faster than the trivial algorithm, but also uses up to 45 times more memory. For small $h$-values the gained speed of DANF is smaller but so is also the space consumption. Almost all of the memory used by DANF is used by MS-BFS. The vertex cover and graph space usage is almost too small to be seen in figure \ref{fig:benchmarkDanfVsTrivial}. 
 
 \begin{figure}[h]
 \centering
