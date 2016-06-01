@@ -1,9 +1,9 @@
 \chapter{Discussion}
 With the DANF algorithm it is now possible to continuously maintain an approximate neighborhood function for all nodes in a graph that supports insertions. As node centralities now can be tracked over time, graphs can be further mined for data and trends can be detected. 
 
-DANF is more efficient than a HyperANF recalculation when the edge insertions bulk size is small compared to the total size of the graph. Further optimizations will increase the time gap. However, DANF use more memory than HyperANF, so a HyperANF recalculation might prove to be able to handle larger graphs given a certain amount of RAM. When $h$ is high (approaching 10) DANF becomes significantly slower compared to HyperANF.
+DANF is more efficient than a HyperBall recalculation when the edge insertions bulk size is small compared to the total size of the graph. However, DANF use more memory than HyperBall, so a HyperBall recalculation might prove to be able to handle larger graphs given a certain amount of RAM. When $h$ is large (approaching 10) DANF becomes significantly slower compared to HyperBall.
 
-An unexpected drawback in the algorithm is the space used by MS-BFS. It has a space complexity of $O(ns)$, where $s$ is the number of sources, and in practice it used a lot more storage than anticipated. The percentage of storage used by MS-BFS is presented in table \ref{table:ms-bfs_space}. See Appendix \ref{appendix4} for graph details. The extra memory means that DANF can use 4 times as much space as HyperBall even when the history counters are not included. However, the MS-BFS space percentage tends to decrease as the graph size increase. The MS-BFS, vertex cover and HyperLogLog counters are included in the total algorithm space.
+An unexpected drawback in the algorithm is the space used by MS-BFS. It has a space complexity of $O(ns)$, where $s$ is the number of sources, and in practice it used a lot more storage than anticipated. The percentage of storage used by MS-BFS is presented in table \ref{table:ms-bfs_space}. See Appendix \ref{appendix4} for graph details. The extra memory means that DANF can use 3 times more space than HyperBall. However, the MS-BFS space percentage tends to decrease as the graph size increase. The MS-BFS, vertex cover and HyperLogLog counters are included in the total algorithm space.
 
 \begin{table}[h]
     \center
@@ -16,7 +16,7 @@ An unexpected drawback in the algorithm is the space used by MS-BFS. It has a sp
         \hline
     \end{tabular}
     \captionsetup{justification=centering}
-    \caption{Percentage of the algorithm space used by MS-BFS with h = 3 and 16 HyperLogLog register per node}
+    \caption{Percentage of the algorithm space used by MS-BFS with h = 3 and 16 HyperLogLog registers per node}
     \label{table:ms-bfs_space}
 \end{table}
 
@@ -32,7 +32,7 @@ The ability to identify central and influential nodes can be useful in many diff
  
 \section{Future work}
 \label{sec:future_work}
-DANF is currently not a fully dynamic algorithm as deletions in the graph are not completed. As this is part of the problem description, the next natural step is to fully implement deletions. There are two missing implementations to achieve deletions, removing edges from a graph file and decreasing HyperLogLog counters affected by a deletion. Deleting edges from a graph file can be performed by re-storing the graph, but a better solution may be to temporarily keep track of which edges are deleted and ignore these until a store is performed. Decreasing HyperLogLog counters can be implemented by a two step algorithm. First, perform a BFS in the transpose of the graph to find all nodes that are possibly affected by the deletion. Then, each possibly affected node can be treated as a new node which will recalculate the node counters. This can be implemented in $O(m^2)$ time, where $m$ is the number of edges. Another way to decrease the counters is to probabilistically decrease the counters of all affected nodes. This would speed up the algorithm but can affect the precision of the counters.
+DANF is currently not a fully dynamic algorithm as deletions in the graph are not fully supported. As this is part of the problem description, the next natural step is to fully implement deletions. There are two missing parts to achieve deletions, removing edges from a graph file and decreasing HyperLogLog counters affected by a deletion. Deleting edges from a graph file can be performed by re-storing the graph, but a better solution may be to temporarily keep track of which edges are deleted and ignore these until a store is performed. Decreasing HyperLogLog counters can be implemented by a two step algorithm. First, perform a BFS in the transpose of the graph to find all nodes that are possibly affected by the deletion. Then, each possibly affected node can be treated as a new node which will recalculate the node counters. This can be implemented in $O(m^2)$ time, where $m$ is the number of edges. Another way to decrease the counters is to probabilistically decrease the counters of all affected nodes. This would speed up the algorithm but can affect the precision of the counters.
 
 DANF also have to be further optimized. Due to time limitations there exists unoptimized bottlenecks. An improvement would be to make the program execute more in parallel. With the exception of the MS-BFS, the program is run sequentially. 
 

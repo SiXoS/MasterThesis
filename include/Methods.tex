@@ -1,32 +1,20 @@
 \chapter{Methods}
 
-A lot of work on large graphs and the approximate neighborhood function has been done by P. Boldi et al. with the webgraph framework \cite{webgraph}. The framework was studied extensively to understand the methods used. As the framework only supported static graphs, extensions to the framework was made to support dynamic graphs and an evolving approximate neighborhood function. 
-
-The research was mainly focused on compression techniques of webgraph graphs \cite{webgraph-compression} and the HyperBall algorithm \cite{hyperball}, including HyperLogLog counters \cite{hyperloglog}. Extensive research was also made on general dynamic algorithms and tools that are used in our algorithm.
-
+The approximate neighborhood function has been studied by P. Boldi et al. in the webgraph framework \cite{webgraph}. As this framework only supports static graphs, we made extensions to support dynamic ones and an evolving approximate neighborhood function. Our research was mainly focused on compression techniques of webgraph graphs \cite{webgraph-compression}, the HyperANF algorithm \cite{hyperanf} and the HyperANF extension HyperBall \cite{hyperball}, including HyperLogLog counters \cite{hyperloglog}. We also studied general dynamic algorithms and tools that are used in our algorithm.
 
 \section{Merging graphs}
-The compression methods used are very sensitive to changes. Nodes can copy neighbors from other nodes so if the neighbors of a node change all nodes that reference the modified node have to be found and updated as well. Moreover, the graph is either stored in a file or in a byte buffer. None of these support insertion of data at an arbitrary position without expensive reallocation and repositioning of the data succeeding that position. As dynamic graphs are required, the optimal method of merging two graphs was investigated. 
-
+The existing compression methods in webgraph are very sensitive to changes. Nodes can copy neighbors from other nodes so if the neighbors of a node change, all nodes that refer to the modified node have to be found and updated as well. Moreover, the graph is either stored in a file or in a byte buffer. None of these methods support insertion of data at an arbitrary position without expensive reallocation and repositioning of the data succeeding that position. As dynamic graphs are required, we investigated optimal methods of merging two graphs.
 
 \section{Extending HyperANF to support dynamic graphs}
-The proposed algorithm has been divided into two phases. In the first phase, the proposed algorithm runs HyperANF on the initial state of the graph. The second phase is the dynamic part, which starts immediately after HyperANF has completed its calculations. In the second phase the algorithm takes the information produced by HyperANF and modifies it when new nodes and edges are added or deleted. The algorithm was optimized to handle several changed edges in a bulk to be able to share computations.
+The proposed algorithm is divided into two phases. In the first phase, the proposed algorithm runs the HyperANF on the initial state of the graph. The second phase is the dynamic part, which starts immediately after the HyperANF is completed. In the second phase, the algorithm takes the information produced by the HyperANF and modifies it when new nodes and edges are added or deleted. To be able to share computations, the algorithm is optimized to handle several edge modifications in bulk.
 
 \section{Extending HyperLogLog to support deletions}
-Support for deleting nodes and edges was desired, but that would require a method to remove elements from the HyperLogLog counters. Extensive research was made to develop a method to delete elements from a HyperLogLog counter. However, the analysis that would be required to make deletions possible while remaining the precision of the counter was deemed out of scope. This seems like a drastic choice to make, but many data-streams are of the type "append-only", in which the resulting graph only allows node and edge additions.
+Support for deleting nodes and edges is desired, but requires a method to remove elements from the HyperLogLog counters. We studied methods to delete elements from HyperLogLog counters. However, we observed that a satisfactory result required a more careful analysis, which was deemed out of scope. This seems like a drastic choice to make, but many data-streams are of the type "append-only", in which the resulting graph only allows node and edge additions.
 
-An alternative way of supporting deletions by making some recalculations was investigated. Due to limited time it has not been implemented. The method is mentioned in future work in \ref{sec:future_work}.
+An alternative way of supporting deletions by making some recalculations was investigated. Due to limited time it has not been implemented. The method is mentioned as a suggestion for future study in section \ref{sec:future_work}.
 
 \section{Benchmarks} 
-Several benchmarks on parts of the algorithm have been performed to ensure that the best methods are used. The benchmarks included comparing both time and memory. On several occasions a balance between memory and computation speed had to be chosen. Speed is the number one priority in this article but the storage used has to be kept reasonable. 
+Several benchmarks on different parts of the algorithm have been performed to ensure that the methods most suitable to our needs are used. The benchmarks included comparing both time and memory. On several occasions, a trade-off between memory and computation speed had to be chosen. Speed is the first priority in this study, although the storage has to be kept reasonable. 
 
-The proposed algorithms was compared to HyperANF. The comparison was done by inserting different amounts of edges into DANF while recalculating HyperANF.  Then, it can be seen how many updates can be performed in the dynamic ANF in the time it takes for the static ANF to complete. Different sized graphs are tested to analyze how the comparison scales. For other researches to be able to compare their algorithm to the proposed algorithm, the data-sets used to perform the benchmarks will be publicly available.
-
-
-\section{Experiments}
-Some experiments have been performed using DANF on a real-time data stream. The experiments were performed on different sizes of initial graphs to analyze how the performance is affected.  
-
-\subsection{Tracking changes over time}
-In the experiments, changes of nodes was tracked to be able to discover trends. Also the nodes with the highest value was tracked to be able to quickly retrieve the most important nodes. 
-
+The proposed algorithm was compared to HyperANF. The comparison was done by inserting different amounts of edges into DANF, while recalculating HyperANF. Different sized graphs are tested to analyze how the comparison scales. For better accessibility, the data-sets used to perform the benchmarks will be publicly available.
 
