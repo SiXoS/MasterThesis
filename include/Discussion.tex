@@ -3,7 +3,7 @@ With the DANF algorithm it is now possible to continuously maintain an approxima
 
 DANF is more efficient than a HyperBall recalculation when the edge insertions bulk size is small compared to the total size of the graph. However, DANF use more memory than HyperBall, so a HyperBall recalculation might prove to be able to handle larger graphs given a certain amount of RAM. When $h$ is large (approaching 10) DANF becomes significantly slower compared to HyperBall.
 
-An unexpected drawback in the algorithm is the space used by MS-BFS. It has a space complexity of $O(ns)$, where $s$ is the number of sources, and in practice it used a lot more storage than anticipated. The percentage of storage used by MS-BFS is presented in table \ref{table:ms-bfs_space}. See Appendix \ref{appendix4} for graph details. The extra memory means that DANF can use 3 times more space than HyperBall. However, the MS-BFS space percentage tends to decrease as the graph size increase. The MS-BFS, vertex cover and HyperLogLog counters are included in the total algorithm space.
+An unexpected drawback in the algorithm is the space used by MS-BFS. It has a space complexity of $O(ns)$, where $s$ is the number of sources, and in practice it used a lot more storage than anticipated. The percentage of storage used by MS-BFS is presented in Table \ref{table:ms-bfs_space}. See Appendix \ref{appendix4} for graph details. The extra memory means that DANF can use 3 times more space than HyperBall. However, the MS-BFS space percentage tends to decrease as the graph size increase. The MS-BFS, vertex cover and HyperLogLog counters are included in the total algorithm space.
 
 \begin{table}[h]
     \center
