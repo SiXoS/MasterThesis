@@ -3,7 +3,7 @@
 \section{Benchmarks}
 
 \subsection{Comparison of graph structures} \label{bench:graphStructure}
-A benchmark was performed to compare the performance of a high level data structure and a byte stream (see Table \ref{table:byteStreamHighLevelTime} and Figure \ref{fig:benchmarkByteStreamVsHighLevelMemory}). The graph in-2004 was used (see Appendix \ref{appendix4}). If all edges are added in one bulk, the performance measured will only reflect the complexity based on the input. By inserting the edges in bulks of 5000 both the complexity based on input and the existing structure are accounted for. The add time in Table \ref{table:byteStreamHighLevelTime} is the time it takes to insert millions of edges in bulks of 5000. The iteration time is the time it takes to iterate over all edges in the graph once.
+A benchmark was performed to compare the performance of a high level data structure and a byte stream (see Table \ref{table:byteStreamHighLevelTime} and Figure \ref{fig:benchmarkByteStreamVsHighLevelMemory}). The graph in-2004 was used (see Appendix \ref{appendix4}). If all edges are added in one bulk, the performance measured will only reflect the complexity based on the input. By inserting the edges in bulks of 5000 both the complexity based on input and the existing structure are accounted for. The add time in Table \ref{table:byteStreamHighLevelTime} is the time it takes to insert edges in bulks of 5000. The iteration time is the time it takes to iterate over all edges in the graph once.
 
 In Figure \ref{fig:benchmarkByteStreamVsHighLevelMemory} the memory difference can be seen. The high level data structure and the byte stream have the same space complexity, but the difference can be explained by the memory overhead used by the high level data structure. 
 
@@ -103,7 +103,7 @@ A comparison between the two-BFS algorithm and DANF was performed by adding edge
 
 
 \subsection{Comparison of DANF and HyperANF}
-A comparison between DANF and HyperANF was made by inserting different amounts of edges into DANF. The number of added edges that was used as the limit was when the time of inserting the edges was the same as recalculating HyperANF. The graph in Figure \ref{fig:benchmarkDanfVsHanf} shows the amount of edges added compared to the initial amount of edges. When the initial graph has 70.000 edges, DANF can add more than the existing edges before HyperANF finishes the recalculation on the new graph, which is the sample right above $10^0$. However, when the initial number of edges increase the ratio of the total number of edges that can be added decrease. When the number of edges grows, DANF converge towards being able to add 0.01\% of the initial edges before a recalculation is completed. The ratio of added edges to initial edges decrease as $h$ increase.
+A comparison between DANF and HyperANF was made by inserting different amounts of edges into DANF. The maximum number of added edges that was used as the limit was when the time of inserting the edges was the same as recalculating HyperANF. The graph in Figure \ref{fig:benchmarkDanfVsHanf} shows the amount of edges added compared to the initial amount of edges. When the initial graph has 70.000 edges, DANF can add more than the existing edges before HyperANF finishes the recalculation on the new graph which is the sample right above $10^0$ in Figure \ref{fig:benchmarkDanfVsHanf}. However, when the initial number of edges increases the ratio of the total number of edges that can be added decreases. When the number of edges grows, DANF converges toward being able to add 0.01\% of the initial edges before a recalculation is completed. The ratio of added edges to initial ones decreases as $h$ increases.
 
 \begin{figure}[h]
 \centering
@@ -114,7 +114,7 @@ A comparison between DANF and HyperANF was made by inserting different amounts o
 \end{figure}
 
 \subsubsection{MS-BFS tuning}
-The MS-BFS article \cite{msbfs} mentions that if several MS-BFSs are to be performed the sources should be sorted and partitioned by out-degree. This increases the speed as when the sources have a higher out-degree, more BFSs meet and can join. When the number of edges added to DANF reaches a certain threshold, the edges to be inserted are divided into partitions. Sorting by out-degree improved the performance in the graph in-2004 (see Appendix \ref{appendix4}) by up to 37.2\% compared to no sorting. As it is preferable to make as many BFSs as possible to meet, sorting by the ANF value improves the performance even more. Sorting by the ANF value improved performance by up to 45\% compared to no sorting.   
+The MS-BFS article \cite{msbfs} mentions that if several MS-BFSs are to be performed, the sources should be sorted and partitioned by out-degree. This increases the speed as when the sources have a higher out-degree, more BFSs meet and can join. When the number of edges added to DANF reaches a certain threshold, the edges to be inserted are divided into partitions. Sorting by out-degree improved the performance in the graph in-2004 (see Appendix \ref{appendix4}) by up to 37.2\% compared to no sorting. As it is preferable to make as many BFSs as possible to meet, sorting by the ANF value improves the performance even more. Sorting by the ANF value improved performance by up to 45\% compared to no sorting.   
 
 
 \section{Experiments on a real-time data stream}
@@ -127,24 +127,24 @@ The MS-BFS article \cite{msbfs} mentions that if several MS-BFSs are to be perfo
   \label{fig:pipeline}
 \end{wrapfigure}
 
-To do real-time experiments on a data stream, there are a few more tasks that need to be performed. The three main tasks are: fetch data, produce graph edges and update DANF. To efficiently perform these tasks they are run in parallel. They are implemented as components of a pipeline as seen in Figure \ref{fig:pipeline}. A component stores its results in a buffer which can be read by the component next in the pipeline. The writing component has write-only access and the reading component has read-only access. Note that Edge producer can be a writer to a DANF updater using another coupling handler. This makes it possible to create a theoretically infinite pipeline with very low coupling between components and allows every component to run in their own threads.
+To do real-time experiments on a data stream, there are a few more tasks that need to be performed. The three main tasks are: fetch data, produce graph edges and update DANF. To efficiently perform these tasks they are run in parallel. They are implemented as components of a pipeline as seen in Figure \ref{fig:pipeline}. A component stores its results in a buffer which can be read by the next component in the pipeline. The writing component has write-only access and the reading component has read-only access. Note that Edge producer can be a writer to a DANF updater using another coupling handler. This makes it possible to create a theoretically infinite pipeline with very low coupling between components and allows every component to run in their own threads.
 
-As all nodes and edges are handled as plain numbers, a mapping needs to be stored from node index to the data. To avoid the data manager from competing with the algorithm for CPU and memory, the data should preferably be stored in a database by a completely different machine. The only data that needs to be saved on the same machine as the algorithm is a mapping from node index to data index, which can be saved on disk.
+As all nodes and edges are handled as plain numbers, a mapping needs to be stored from node index to the data. To avoid the data manager competing with the algorithm for CPU and memory, the data should preferably be stored in a database by a completely different machine. As the only data that needs to be saved on the same machine is a mapping from node indices to data indices, which can be saved on disk.
 
-A list of the calculated value for each node is kept in a list $A$. Another list $B$ keeps track of the value of the nodes that change. After a given amount of time, the difference of the changed nodes is checked and nodes with significant changes are marked as rapidly changing. The elements in $B$ are added to $A$ and $B$ is cleared. This allows the detection of upcoming trends. 
+A list $A$ of the calculated value for each node is kept. Another list $B$ keeps track of the value of the nodes that change. After a given amount of time, the difference of the changed nodes is checked and nodes with significant changes are marked as rapidly changing. The elements in $B$ are added to $A$ and $B$ is cleared. This allows the detection of upcoming trends. 
 
-Another useful feature used was to keep track of the top nodes, sorted in descending order according to their DANF values. Initially, all nodes were tracked. However, this turned out to be unsustainable on a graph with only a few millions of nodes. Instead, only the top most $X$ nodes were tracked. This leads to a drastic speed increase while still being able to check which are the most central nodes. 
+Another useful feature is to keep track of the top nodes, sorted in descending order according to their DANF values. Initially, all nodes were tracked. However, this turned out to be unsustainable on a graph with only a few million nodes. Instead, only the top $X$ nodes were tracked. This leads to a drastic speed increase while still allowing to identify the most central nodes. 
 
 
 \subsection{Graph layout}
 
-When performing experiments on the data-stream a certain graph structure was used. The structure was designed to be able to detect popular subjects, authors and sources. This was achieved by creating three different graph models which, for simplicity, were combined into one (see Figure \ref{fig:experiment-graph}). The common node for all models is Document. 
+When performing experiments on the data stream, we used a certain graph structure. The structure was designed to enable us to detect popular subjects, authors and sources. This was achieved by creating three different graph models which, for simplicity, were combined into one (see Figure \ref{fig:experiment-graph}). The common node for all models is Document. 
 
 The first model is the concept to document part. This model identifies popular subjects by retrieving all concepts that are mentioned in a document and then adding an edge from the concept to the document. The DANF value represents how many mentions a concept have. 
 
-The second model is the location to document line in the middle. This model can identify which locations, sources (news) and authors that publishes the most documents.
+The second model is the location to document line in the middle of \ref{fig:experiment-graph}. This model can identify which locations, sources (news) and authors that publishes the most documents.
 
-The last model is the named entity part to the right in the figure. The named entities are general things mentioned in articles; such as countries, people or companies. Each entity has a sentiment. The sentiment specifies if the entity is mentioned in a positive (P), neutral (N) or negative (V) manner. Using the visualized structure for the named entities in Figure \ref{fig:experiment-graph} enables detection of both the number of mentions and trends of how entities are referenced.
+The last model is the named entity part to the right in Figure \ref{fig:experiment-graph}. The named entities are general things mentioned in articles; such as countries, people or companies. Each entity has a sentiment. The sentiment specifies if the entity is mentioned in a positive (P), neutral (N) or negative (V) manner. Using the visualized structure for the named entities in Figure \ref{fig:experiment-graph} enables detection of both the number of mentions and trends of how entities are referenced.
 
 \begin{figure}[h]
 \centering
@@ -161,9 +161,9 @@ The first experiment performed was done by creating an initially empty graph and
 
 \subsection{Starting with an arbitrary large graph}
 
-Building a large graph from the existing data would take a long time. The data would have to be parsed and analyzed to generate edges. Instead of spending a large amount of time to generate the graph the it-2004 graph (see Appendix \ref{appendix4}), was used. DANF managed ten documents per second, which means that it could not quite keep up with the stream. This indicates that roughly one billion edges are the limit of the current implementation, but the it-2004 graph is more dense than the constructed graph so DANF would have a higher performance if the graph was made from scratch. More optimizations are required to prevent buffer build up in the long run. 
+Building a large graph from the existing data takes a long time. The data have to be parsed and analyzed to generate edges. Instead of spending a large amount of time to generate the graph, the it-2004 graph (see Appendix \ref{appendix4}) was used. DANF managed ten documents per second, which means that it could not keep up with the stream. This indicates that roughly one billion edges is the limit of the current implementation. However, the it-2004 graph is denser than the constructed graph. Hence, DANF would have a higher performance if the graph was made from scratch. More optimizations are required to prevent buffer build up in the long run. 
 
 \subsection{Data retrieval}
-From the experiment it was evident that both the United States and China were central nodes in the constructed graph. The United States was one of the most central node in all of the three models.
+From the experiment, it was evident that both the United States and China were central nodes in the constructed graph. The United States was one of the most central nodes in all of the three models.
 
 In the experiment, a trend concerning North Korea was detected. Short after North Korea released information concerning further nuclear tests, the DANF value of the North Korean concept node increased rapidly. Such trends can easily be detected by tracking rapidly changing nodes.
